@@ -1,0 +1,21 @@
+{
+    "name": "simple_6",
+    "detector": "SimpleConvYOLO",
+    "n_base_units": 6,
+    "initial_batch_size": 15,
+    "max_batch_size": 240,
+    "max_epoch": 100,
+    "pascal_voc_data_root": "/home/yutaka/study/ml/VOCdevkit",
+    "urban_objects_data_root": "/home/yutaka/study/urban_objects",
+    "pascal_voc3_noobj_weight": 0.22,
+    "pascal_voc_noobj_weight": 0.3,
+    "urban_objects_noobj_weight": 0.5,
+    "training_menu": [
+        "urban_objects",
+        "pascal_voc3",
+        "urban_objects",
+        "pascal_voc3",
+        "urban_objects",
+        "pascal_voc3"
+    ]
+}
