@@ -21,3 +21,9 @@ $ CC="cc -mavx2" pip install -r requirements.txt
 ```
 $ python train.py ../conf/${filename}
 ```
+
+### Export trained model to ONNX
+
+```
+$ python to_onnx.py ../conf/${filename}
+```
