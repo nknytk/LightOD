@@ -5,7 +5,7 @@ class GridRetriever:
         self.n_grid_x = n_grid_x
         self.n_grid_y = n_grid_y
         self.grid_size_x = int(img_x/n_grid_x)
-        self.grid_size_y = int(img_x/n_grid_y)
+        self.grid_size_y = int(img_y/n_grid_y)
 
     def grid_position(self, x_min, y_min, x_max, y_max):
         """
