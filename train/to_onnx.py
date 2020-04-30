@@ -11,8 +11,7 @@ import onnx_chainer
 
 this_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(this_dir, '..'))
-from detector.simpleconv import SimpleConvYOLO
-from detector.mobile_yolo import MobileYOLO
+import detector
 
 n_classes = {
     'urban_objects': 8,
@@ -29,7 +28,7 @@ def main():
     results_dir = os.path.join(this_dir, 'results', conf['name'])
     best_files = search_best_files(results_dir)
 
-    model_class = SimpleConvYOLO if conf['detector'] == 'SimpleConvYOLO' else MobileYOLO
+    model_class = getattr(detector, conf['detector'])
     onnx_dir = os.path.join(this_dir, '../detector/trained')
     for training_menu in best_files:
         chainer_model = model_class(n_classes[training_menu], conf['n_base_units'])

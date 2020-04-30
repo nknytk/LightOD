@@ -1,6 +1,7 @@
 import chainer
 from chainer import links as L
 from chainer import functions as F
+from .base import DetectorBase
 
 
 class ConvLayer1(chainer.Chain):
@@ -28,7 +29,7 @@ class ConvLayer2(chainer.Chain):
         return F.leaky_relu(self.bn2(self.conv2(x)))
 
 
-class SimpleConvYOLO(chainer.Chain):
+class SimpleConvYOLO(DetectorBase):
 
     img_size = 224
     n_grid = 7
@@ -55,14 +56,6 @@ class SimpleConvYOLO(chainer.Chain):
             # 7
             self.cl6 = L.Convolution2D(n_base_units * 16, 4 + n_classes, ksize=1, stride=1, pad=0)
 
-    def __call__(self, x, t=None):
-        pred = self.predict(x)
-        if t is None:
-            return pred
-        evaluated = self.loss_calc.loss(pred, t)
-        chainer.report(evaluated, self)
-        return evaluated['loss']
-
     def predict(self, x):
         x = self.cl1(x)
         x = self.cl2(x)
@@ -80,16 +73,3 @@ class SimpleConvYOLO(chainer.Chain):
         batch_size = int(x.size / (self.n_grid**2 * (4 + self.n_classes)))
         r = F.reshape(x, (batch_size, self.n_grid**2, 4 + self.n_classes))
         return r
-
-    def to_gpu(self, *args, **kwargs):
-        if self.loss_calc:
-            self.loss_calc.to_gpu()
-        return super().to_gpu(*args, **kwargs)
-
-    def to_cpu(self, *args, **kwargs):
-        if self.loss_calc:
-            self.loss_calc.to_cpu()
-        return super().to_gpu(*args, **kwargs)
-
-    def to_intel64(self):
-        return super().to_intel64()

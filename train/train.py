@@ -19,8 +19,7 @@ from lib.dataset import YoloDataset
 from lib.batchsize import AdaptiveBatchsizeIncrement
 from lib.loss import LossCalculator
 from dataload import pascal_voc, pascal_voc3, urban_objects
-from detector.simpleconv import SimpleConvYOLO
-from detector.mobile_yolo import MobileYOLO
+import detector
 
 
 def main():
@@ -32,7 +31,7 @@ def main():
     pascal_voc_data = pascal_voc3.load(conf['pascal_voc_data_root'])
     urban_objects_data = urban_objects.load(conf['urban_objects_data_root'])
 
-    model_class = SimpleConvYOLO if conf['detector'] == 'SimpleConvYOLO' else MobileYOLO
+    model_class = getattr(detector, conf['detector'])
     trained_model = None
 
     for i, data_type in enumerate(conf['training_menu']):

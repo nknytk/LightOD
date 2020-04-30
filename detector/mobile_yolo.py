@@ -4,6 +4,7 @@
 import chainer
 import chainer.functions as F
 import chainer.links as L
+from .base import DetectorBase
 
 
 class ConvBN(chainer.Chain):
@@ -47,18 +48,33 @@ class ConvDW(chainer.Chain):
         return self.activation(h)
 
 
-class MobileYOLOBase(chainer.Chain):
+class MobileYOLO(DetectorBase):
 
     img_size = 224
     n_grid=7
 
-    def __call__(self, x, t=None):
-        pred = self.predict(x)
-        if t is None:
-            return pred
-        evaluated = self.loss_calc.loss(pred, t)
-        chainer.report(evaluated, self)
-        return evaluated['loss']
+    def __init__(self, n_classes=1, n_base_units=32):
+        activation = F.leaky_relu
+        super().__init__()
+        self.n_classes = n_classes
+        self.loss_calc = None
+        with self.init_scope():
+            self.conv_bn = ConvBN(3, n_base_units, 2, activation=activation)
+            self.conv_ds_2 = ConvDW(n_base_units, n_base_units * 2, 1, restype=None, activation=activation)
+            self.conv_ds_3 = ConvDW(n_base_units * 2, n_base_units * 4, 2, restype=None, activation=activation)
+            self.conv_ds_4 = ConvDW(n_base_units * 4, n_base_units * 4, 1, restype=None, activation=activation)
+            self.conv_ds_5 = ConvDW(n_base_units * 4, n_base_units * 8, 2, restype=None, activation=activation)
+            self.conv_ds_6 = ConvDW(n_base_units * 8, n_base_units * 8, 1, restype=None, activation=activation)
+            self.conv_ds_7 = ConvDW(n_base_units * 8, n_base_units *16, 2, restype=None, activation=activation)
+
+            self.conv_ds_8 = ConvDW(n_base_units *16, n_base_units *16, 1, restype=None, activation=activation)
+            self.conv_ds_9 = ConvDW(n_base_units *16, n_base_units *16, 1, restype=None, activation=activation)
+            self.conv_ds_10 = ConvDW(n_base_units *16, n_base_units *16, 1, restype=None, activation=activation)
+            self.conv_ds_11 = ConvDW(n_base_units *16, n_base_units *16, 1, restype=None, activation=activation)
+            self.conv_ds_12 = ConvDW(n_base_units *16, n_base_units *16, 1, restype=None, activation=activation)
+
+            self.conv_ds_13 = ConvDW(n_base_units *16, n_base_units *32, 2, restype=None, activation=activation)
+            self.conv_ds_14 = ConvDW(n_base_units *32, 4 + n_classes, 1, restype=None, activation=activation)
 
     def predict(self, x):
         h = self.conv_bn(x)
@@ -82,41 +98,3 @@ class MobileYOLOBase(chainer.Chain):
         batch_size = int(h.size / (self.n_grid**2 * (4 + self.n_classes)))
         r = F.reshape(h, (batch_size, self.n_grid**2, 4 + self.n_classes))
         return r
-
-    def to_gpu(self, *args, **kwargs):
-        if self.loss_calc:
-            self.loss_calc.to_gpu()
-        return super().to_gpu(*args, **kwargs)
-
-    def to_cpu(self, *args, **kwargs):
-        if self.loss_calc:
-            self.loss_calc.to_cpu()
-        return super().to_gpu(*args, **kwargs)
-
-    def to_intel64(self):
-        return super().to_intel64()
-
-
-class MobileYOLO(MobileYOLOBase):
-    def __init__(self, n_classes=1, n_base_units=32):
-        activation = F.leaky_relu
-        super().__init__()
-        self.n_classes = n_classes
-        self.loss_calc = None
-        with self.init_scope():
-            self.conv_bn = ConvBN(3, n_base_units, 2, activation=activation)
-            self.conv_ds_2 = ConvDW(n_base_units, n_base_units * 2, 1, restype=None, activation=activation)
-            self.conv_ds_3 = ConvDW(n_base_units * 2, n_base_units * 4, 2, restype=None, activation=activation)
-            self.conv_ds_4 = ConvDW(n_base_units * 4, n_base_units * 4, 1, restype=None, activation=activation)
-            self.conv_ds_5 = ConvDW(n_base_units * 4, n_base_units * 8, 2, restype=None, activation=activation)
-            self.conv_ds_6 = ConvDW(n_base_units * 8, n_base_units * 8, 1, restype=None, activation=activation)
-            self.conv_ds_7 = ConvDW(n_base_units * 8, n_base_units *16, 2, restype=None, activation=activation)
-
-            self.conv_ds_8 = ConvDW(n_base_units *16, n_base_units *16, 1, restype=None, activation=activation)
-            self.conv_ds_9 = ConvDW(n_base_units *16, n_base_units *16, 1, restype=None, activation=activation)
-            self.conv_ds_10 = ConvDW(n_base_units *16, n_base_units *16, 1, restype=None, activation=activation)
-            self.conv_ds_11 = ConvDW(n_base_units *16, n_base_units *16, 1, restype=None, activation=activation)
-            self.conv_ds_12 = ConvDW(n_base_units *16, n_base_units *16, 1, restype=None, activation=activation)
-
-            self.conv_ds_13 = ConvDW(n_base_units *16, n_base_units *32, 2, restype=None, activation=activation)
-            self.conv_ds_14 = ConvDW(n_base_units *32, 4 + n_classes, 1, restype=None, activation=activation)
