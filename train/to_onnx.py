@@ -57,7 +57,7 @@ def search_best_files(results_dir):
 
 
 def chainer_to_onnx(chainer_model, onnx_export_path):
-    dummy_input = numpy.zeros((1, 3, 224, 224), dtype=numpy.float32)
+    dummy_input = numpy.zeros((1, 3, chainer_model.img_size, chainer_model.img_size), dtype=numpy.float32)
     onnx_chainer.export(chainer_model, dummy_input, filename=onnx_export_path)
     onnx_model = onnx.load(onnx_export_path)
     onnx_model_optimized = optimizer.optimize(onnx_model, ['fuse_bn_into_conv'])
