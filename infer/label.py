@@ -55,9 +55,9 @@ class DrawLabel:
                     iou = self.iou(detections[i][2], detections[j][2])
                     if iou >= self.suppress_iou_threshold:
                         if detections[i][0] > detections[j][0]:
-                            detections[j][0] = False
+                            detections[j][1] = False
                         else:
-                            detections[i][0] = False
+                            detections[i][1] = False
 
             for proba, to_draw, bbox in detections:
                 if to_draw:
